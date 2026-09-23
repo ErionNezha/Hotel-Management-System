@@ -1,0 +1,132 @@
+<!-- Created by Erion Nezha — © 2026 All rights reserved -->
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Management — Demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.wrap{max-width:760px;margin:0 auto;padding:24px 16px 60px}
+h1{text-align:center;color:#fbbf24;margin-bottom:4px}
+.sub{text-align:center;color:#94a3b8;font-size:.88rem;margin-bottom:20px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:16px}
+.card h2{font-size:1.05rem;color:#7dd3fc;margin-bottom:14px}
+label{display:block;font-size:.85rem;color:#94a3b8;margin:10px 0 4px}
+input,select{width:100%;padding:10px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:.95rem}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #ffffff10}
+.item:last-child{border-bottom:none}
+.item .nm{flex:1}.item .pr{color:#fbbf24;font-size:.85rem;white-space:nowrap}
+.item input{width:64px;text-align:center;padding:6px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+button{background:#0284c7;color:#fff;border:none;padding:11px 20px;border-radius:8px;cursor:pointer;font-size:.92rem;font-weight:600}
+button:hover{background:#0369a1}
+button.ghost{background:#334155}
+button.ghost:hover{background:#475569}
+.bill{background:#052e16;border:1px solid #16a34a;border-radius:12px;padding:20px;font-family:Consolas,monospace;font-size:.9rem;line-height:1.8;display:none}
+.bill h2{color:#4ade80;font-family:'Segoe UI',sans-serif}
+.bill .tot{color:#fbbf24;font-weight:700}
+.steps{display:flex;gap:6px;justify-content:center;margin-bottom:18px;flex-wrap:wrap}
+.step{background:#1e293b;border:1px solid #334155;color:#64748b;padding:6px 12px;border-radius:20px;font-size:.78rem}
+.step.done{background:#065f46;border-color:#10b981;color:#a7f3d0}
+.step.now{background:#0c4a6e;border-color:#0284c7;color:#7dd3fc}
+.note{background:#0c4a6e55;border:1px solid #0284c755;border-radius:8px;padding:10px 14px;font-size:.82rem;color:#7dd3fc;margin-bottom:16px}
+footer{text-align:center;padding:16px;color:#64748b;font-size:.82rem}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🏨 Hotel Management System</h1>
+<p class="sub">Port web i sistemit Python (console) — e njëjta logjikë faturimi</p>
+<div class="note">💡 Demo-ja ndjek saktësisht hapat e <strong>HMS.py</strong>: të dhënat e klientit → qiraja e dhomës → restoranti → lavanteria → lojërat → fatura.</div>
+<div class="steps" id="steps"></div>
+
+<div class="card" id="s1">
+<h2>1️⃣ Të dhënat e klientit</h2>
+<div class="row">
+<div><label>Emri</label><input id="cname" placeholder="Emri"></div>
+<div><label>Adresa</label><input id="caddr" placeholder="Adresa"></div>
+</div>
+<div class="row">
+<div><label>Check-in</label><input id="cind" type="date"></div>
+<div><label>Check-out</label><input id="cout" type="date"></div>
+</div>
+<div class="btns"><button onclick="go(2)">Vazhdo →</button></div>
+</div>
+
+<div class="card hidden" id="s2">
+<h2>2️⃣ Qiraja e dhomës</h2>
+<label>Lloji i dhomës</label>
+<select id="room">
+<option value="6000">Tipi A — Rs 6000/natë</option>
+<option value="5000">Tipi B — Rs 5000/natë</option>
+<option value="4000">Tipi C — Rs 4000/natë</option>
+<option value="3000">Tipi D — Rs 3000/natë</option>
+</select>
+<label>Netë qëndrimi</label><input id="nights" type="number" min="1" value="1">
+<div class="btns"><button class="ghost" onclick="go(1)">← Kthehu</button><button onclick="go(3)">Vazhdo →</button></div>
+</div>
+
+<div class="card hidden" id="s3">
+<h2>3️⃣ Restoranti</h2>
+<div id="food"></div>
+<div class="btns"><button class="ghost" onclick="go(2)">← Kthehu</button><button onclick="go(4)">Vazhdo →</button></div>
+</div>
+
+<div class="card hidden" id="s4">
+<h2>4️⃣ Lavanteria</h2>
+<div id="laundry"></div>
+<div class="btns"><button class="ghost" onclick="go(3)">← Kthehu</button><button onclick="go(5)">Vazhdo →</button></div>
+</div>
+
+<div class="card hidden" id="s5">
+<h2>5️⃣ Lojërat</h2>
+<div id="games"></div>
+<div class="btns"><button class="ghost" onclick="go(4)">← Kthehu</button><button onclick="showBill()">🧾 Shfaq faturën</button></div>
+</div>
+
+<div class="bill" id="bill"></div>
+<div class="btns hidden" id="againWrap" style="justify-content:center"><button class="ghost" onclick="location.reload()">🔄 Klient i ri</button></div>
+</div>
+<footer>Krijuar nga <strong>Erion Nezha</strong> — © 2026</footer>
+<script>
+const FOOD=[["Ujë","Rs 20",20],["Çaj","Rs 10",10],["Mëngjes combo","Rs 90",90],["Drekë","Rs 110",110],["Darkë","Rs 150",150]];
+const LAUN=[["Pantallona të shkurtra","Rs 3",3],["Tuta","Rs 4",4],["Këmishë","Rs 5",5],["Xhinse","Rs 6",6],["Kostum","Rs 8",8]];
+const GAME=[["Pingpong","Rs 60/orë",60],["Bowling","Rs 80/orë",80],["Snooker","Rs 70/orë",70],["Video-lojëra","Rs 90/orë",90],["Pool","Rs 50/orë",50]];
+let roomNo=101;
+function mk(list,el,unit){document.getElementById(el).innerHTML=list.map((x,i)=>`<div class="item"><span class="nm">${x[0]}</span><span class="pr">${x[1]}</span><input type="number" min="0" value="0" data-p="${x[2]}" id="${el}-${i}"></div>`).join('')+`<div class="item"><span class="nm" style="color:#64748b">Sasia = ${unit}</span></div>`;}
+mk(FOOD,'food','copë');mk(LAUN,'laundry','copë');mk(GAME,'games','orë');
+const NAMES=["Të dhënat","Dhoma","Restoranti","Lavanteria","Lojërat","Fatura"];
+function steps(n){document.getElementById('steps').innerHTML=NAMES.map((x,i)=>`<span class="step ${i+1<n?'done':i+1===n?'now':''}">${i+1}. ${x}</span>`).join('');}
+function sum(el){let t=0;document.querySelectorAll('#'+el+' input').forEach(i=>t+= (+i.value||0)*(+i.dataset.p));return t;}
+function go(n){[1,2,3,4,5].forEach(i=>document.getElementById('s'+i).classList.add('hidden'));document.getElementById('s'+n).classList.remove('hidden');document.getElementById('bill').style.display='none';document.getElementById('againWrap').classList.add('hidden');steps(n);window.scrollTo(0,0);}
+function showBill(){
+  const rent=(+document.getElementById('room').value)*(+document.getElementById('nights').value||0);
+  const food=sum('food'),laun=sum('laundry'),game=sum('games');
+  const sub=rent+food+laun+game, svc=1800, grand=sub+svc;
+  const roomTxt=document.getElementById('room').selectedOptions[0].text;
+  [1,2,3,4,5].forEach(i=>document.getElementById('s'+i).classList.add('hidden'));
+  const b=document.getElementById('bill');
+  b.innerHTML=`<h2>🧾 FATURA E HOTELIT</h2>
+Të dhënat e klientit:<br>
+&nbsp;&nbsp;Emri: ${(document.getElementById('cname').value||'—')}<br>
+&nbsp;&nbsp;Adresa: ${(document.getElementById('caddr').value||'—')}<br>
+&nbsp;&nbsp;Check-in: ${(document.getElementById('cind').value||'—')}<br>
+&nbsp;&nbsp;Check-out: ${(document.getElementById('cout').value||'—')}<br>
+&nbsp;&nbsp;Nr. dhomës: ${roomNo}<br><br>
+Qiraja (${roomTxt}): Rs ${rent}<br>
+Fatura e ushqimit: Rs ${food}<br>
+Fatura e lavanterisë: Rs ${laun}<br>
+Fatura e lojërave: Rs ${game}<br><br>
+<span class="tot">Nëntotali: Rs ${sub}<br>
+Shërbime shtesë: Rs ${svc}<br>
+TOTALI: Rs ${grand}</span>`;
+  b.style.display='block';document.getElementById('againWrap').classList.remove('hidden');steps(6);roomNo++;window.scrollTo(0,0);
+}
+steps(1);
+</script>
+</body>
+</html>
